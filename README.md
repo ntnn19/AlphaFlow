@@ -30,7 +30,7 @@ singularity build alphafold3_parallel.sif docker://ntnn19/alphafold3:latest_para
 Clone this repository this repository.
 
 ```bash
-git clone https://github.com/ntnn19/alphafold3_workflow.git
+git clone https://github.com/ntnn19/AlphaFlow.git
 ```
 
 Go to the repository location
