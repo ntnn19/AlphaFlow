@@ -1,8 +1,6 @@
 # AlphaFold 3 workflow
 
-A Snakemake workflow to automate AlphaFold 3 predictions
-
-You are currently in branch **'master'**.
+A Snakemake workflow for high-throughput AlphaFold 3 predictions
 
 This workflow supports separate execution of the **CPU** and **GPU** steps. 
 
