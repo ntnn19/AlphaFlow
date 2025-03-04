@@ -35,7 +35,7 @@ git clone https://github.com/ntnn19/AlphaFlow.git
 
 Go to the repository location
 ```bash
-cd alphafold3_workflow
+cd AlphaFlow
 ```
 
 An example JSON and CSV files is available in the example directory:
