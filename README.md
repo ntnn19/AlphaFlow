@@ -1,13 +1,10 @@
-# AlphaFold3 workflow
+# AlphaFold 3 workflow
 
-You are currently in branch **'parallel'**.
+A Snakemake workflow to automate AlphaFold 3 predictions
 
-The workflow implemented in this branch is slightly different than the one in branch **'master'**.
+You are currently in branch **'master'**.
 
-Similar to the workflow in branch **'master'**, this workflow supports separate execution of the **CPU** and **GPU** steps. 
-On top of that, it also distributes inference runs across multiple GPU devices using **GNU parallel**.
-This is particularly useful when your HPC setup has multi-GPU nodes, but does not support "consumable resources".   
-
+This workflow supports separate execution of the **CPU** and **GPU** steps. 
 
 ### TO DO
 - Add steps for downstream analyses such as relaxation, assembly, binding site prediction, scoring etc. 
