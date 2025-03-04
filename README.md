@@ -2,8 +2,6 @@
 
 A Snakemake workflow for high-throughput AlphaFold 3 predictions
 
-This workflow supports separate execution of the **CPU** and **GPU** steps. 
-
 ### TO DO
 - Add steps for downstream analyses such as relaxation, assembly, binding site prediction, scoring etc. 
 - Add a reporting step to the workflow in a form of a table that describe each predicted structure.
