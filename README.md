@@ -1,4 +1,4 @@
-# AlphaFold3 Workflow
+# AlphaFlow
 
 This workflow supports separate execution of the **CPU** and **GPU** steps. It also distributes inference runs across multiple GPU devices using **GNU parallel**.
 
