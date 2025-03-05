@@ -63,7 +63,7 @@ rule all:
         expand(os.path.join(OUTPUT_DIR,"AF3_DATA","{i}/{i}_data.json"),i=JOB_NAMES),
 
 
-rule AF3_DATA:
+rule AF3_DATA_PIPELINE:
     input:
         os.path.join(OUTPUT_DIR,"PREPROCESSING","{i}.json")
     params:
