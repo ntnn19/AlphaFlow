@@ -10,11 +10,17 @@ A Snakemake workflow for high-throughput AlphaFold 3 predictions
 ## Steps to setup & execute
 
 ### 1. Build the Singularity container
-
+Install singularity. See [here](https://github.com/google-deepmind/alphafold3/blob/main/docs/installation.md#install-singularity) or [here](https://docs.sylabs.io/guides/3.3/user-guide/installation.html) for instructions.
 Run the following command to build the Singularity container that supports parallel inference runs:
 
 ```bash
 singularity build alphafold3_parallel.sif docker://ntnn19/alphafold3:latest_parallel_a100_40gb
+```
+
+Or
+
+```bash
+singularity build alphafold3_parallel.sif docker://ntnn19/alphafold3:latest_parallel_a100_80gb
 ```
 
 ### Notes
@@ -26,7 +32,7 @@ Make sure to download the required [AlphaFold3 databases](https://github.com/goo
 Clone this repository.
 
 ```bash
-git clone --branch parallel --single-branch https://github.com/ntnn19/AlphaFold3_workflow.git
+git clone https://github.com/ntnn19/AlphaFold3_workflow.git
 ```
 
 Go to the repository location
@@ -75,7 +81,8 @@ Edit the values to your needs.
 -   **output_dir**: <path_to_your_output_directory> # Stores the outputs of this workflow
 -   **af3_flags**: # configures AlphaFold 3
      -   **af3_container**: <path_to_your_alphafold3_container> 
-- **input_csv**: <path_to_your_csv_table> 
+-   **input_csv**: <path_to_your_csv_table>
+-   **tmp_dir**: <path_to_your_tmp_dir> 
 
 For running the default workflow, the user must provide a csv table such as the following:
 
@@ -99,10 +106,10 @@ For example:
 ```bash
 input_csv: example/virtual_drug_screen_df.csv
 output_dir: output
-mode: virtual-drug-screen 
-# n_splits: 4  # Optional, for running using the 'parallel' branch of this repo
+tmp_dir: tmp
+mode: virtual-drug-screen
 af3_flags:
-  --af3_container: <path_to_your_alphafold_3_container>
+  --af3_container: alphafold3_parallel.sif
 ```
 
 **Examples for supported input_csv files for each mode**:
@@ -237,10 +244,10 @@ The optional flags are:
 ```bash
 input_csv: example/virtual_drug_screen_df.csv
 output_dir: output
+tmp_dir: tmp
 mode: virtual-drug-screen 
-# n_splits: 4  # Optional, for running using the 'parallel' branch of this repo
 af3_flags:
-  --af3_container: <path_to_your_alphafold_3_container>
+  --af3_container: alphafold3_parallel.sif
   --num_diffusion_samples: 5
 ```
 ### 5. Configure the profile (Optional)
@@ -256,7 +263,7 @@ Information on snakemake flags can be found [here](https://snakemake.readthedocs
 snakemake -s workflow/Snakefile \
 --use-singularity --singularity-args \
 '--nv -B <your_alphafold3_weights_dir>:/root/models -B <your_output_dir>/PREPROCESSING:/root/af_input -B <your_output_dir>:/root/af_output -B <your_alphafold3_databases_dir>:/root/public_databases -B <your_alphafold3_tmp_dir>/tmp:/tmp --env XLA_CLIENT_MEM_FRACTION=3.2' \
--j unlimited -c all --executor slurm \
+-j unlimited -c all \
 -p -k -w 30 --rerun-triggers mtime -n
 ```
 **Local run**
@@ -264,7 +271,7 @@ snakemake -s workflow/Snakefile \
 snakemake -s workflow/Snakefile \
 --use-singularity --singularity-args  \
 '--nv -B <your_alphafold3_weights_dir>:/root/models -B <your_output_dir>/PREPROCESSING:/root/af_input -B <your_output_dir>:/root/af_output -B <your_alphafold3_databases_dir>:/root/public_databases -B <your_alphafold3_tmp_dir>/tmp:/tmp --env XLA_CLIENT_MEM_FRACTION=3.2' \
--j unlimited -c all --executor slurm \
+-j unlimited -c all \
 -p -k -w 30 --rerun-triggers mtime
 ```
 
@@ -273,6 +280,6 @@ snakemake -s workflow/Snakefile \
 snakemake -s workflow/Snakefile \
 --use-singularity --singularity-args  \
 '--nv -B <your_alphafold3_weights_dir>:/root/models -B <your_output_dir>/PREPROCESSING:/root/af_input -B <your_output_dir>:/root/af_output -B <your_alphafold3_databases_dir>:/root/public_databases -B <your_alphafold3_tmp_dir>/tmp:/tmp --env XLA_CLIENT_MEM_FRACTION=3.2' \
--j unlimited -c all --executor slurm \
+-j unlimited -c all \
 -p -k -w 30 --rerun-triggers mtime --workflow-profile profile
 ```
