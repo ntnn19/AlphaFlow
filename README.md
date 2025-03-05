@@ -2,6 +2,9 @@
 
 A Snakemake workflow for high-throughput AlphaFold 3 predictions
 
+Switch to the 'parallel' branch of this repository if you plan to execute this workflow in an HPC environment that does not support 'consumable resources'.
+
+
 ![Workflow DAG](dag.png)
 ### TO DO
 - Add steps for downstream analyses such as relaxation, assembly, binding site prediction, scoring etc. 
