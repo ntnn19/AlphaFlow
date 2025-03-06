@@ -7,7 +7,7 @@ Switch to the 'parallel' branch of this repository if you plan to execute this w
 
 ![Workflow DAG](dag.png)
 
-🚀 What’s new?
+### 🚀 What’s new?
 
     📖 Better documentation to make setup & usage smoother
     🔄 Support for different running modes, including:
