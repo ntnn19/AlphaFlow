@@ -6,6 +6,16 @@ Switch to the 'parallel' branch of this repository if you plan to execute this w
 
 
 ![Workflow DAG](dag.png)
+
+🚀 What’s new?
+
+    📖 Better documentation to make setup & usage smoother
+    🔄 Support for different running modes, including:
+        🧲 Pulldown
+        💊 Virtual drug screening
+        🔬 All-vs-all pairwise interactions
+    🛠️ Future plans: Adding stoichiometry screening support
+    
 ### TO DO
 - Add steps for downstream analyses such as relaxation, assembly, binding site prediction, scoring etc. 
 - Add a reporting step to the workflow in a form of a table that describe each predicted structure.
