@@ -18,7 +18,6 @@ Switch to the 'parallel' branch of this repository if you plan to execute this w
     
 ### TO DO
 - Add steps for downstream analyses such as relaxation, assembly, binding site prediction, scoring etc. 
-- Add a reporting step to the workflow in a form of a table that describe each predicted structure.
 
 
 ## Steps to setup & execute
