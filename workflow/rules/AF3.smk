@@ -1,5 +1,6 @@
 configfile: "config/config.yaml"
 import os
+import pandas as pd
 INPUT_DF = config["input_csv"]
 OUTPUT_DIR = config["output_dir"]
 MODE = config.get("mode","default")
@@ -42,6 +43,8 @@ UNIPROT_CLUSTER_ANNOT_DATABASE_PATH = get_af3_flag_value('--uniprot_cluster_anno
 UNIREF90_DATABASE_PATH = get_af3_flag_value('--uniref90_database_path', os.path.join('/root/public_databases','uniref90_2022_05.fa'))
 
 
+
+
 def get_af3_outputs(wildcards):
     PREPROCESSING_DIR = checkpoints.PREPROCESSING.get(**wildcards).output[0]
     JOB_NAMES, = glob_wildcards(os.path.join(PREPROCESSING_DIR, "{i}.json"))
@@ -49,6 +52,26 @@ def get_af3_outputs(wildcards):
         os.path.join(PREPROCESSING_DIR,"{i}.json")
         ,i=JOB_NAMES))+ list(expand(os.path.join(OUTPUT_DIR,"AF3_INFERENCE","{i}/{i}/{i}_model.cif"),i=JOB_NAMES))+list(expand(
         os.path.join(OUTPUT_DIR,"AF3_DATA","{i}/{i}_data.json"),i=JOB_NAMES))
+
+
+def prepare_colabfold_search_compatible_table(input_file, output_file):
+    # Read the CSV file
+    df = pd.read_csv(input_file)
+    df=  df[df["type"]!="ligand"]
+    df = df[["job_name","sequence"]]
+    # Rename 'job_name' to 'id'
+    df.rename(columns={'job_name': 'id'},inplace=True)
+    print(df)
+    exit()
+    # Group by 'id' and join sequences with ':'
+    df_grouped = df.groupby('id')['sequence'].apply(lambda x: ':'.join(x)).reset_index()
+
+    # Sort by sequence length
+    df_grouped['seq_length'] = df_grouped['sequence'].apply(len)
+    df_sorted = df_grouped.sort_values(by='seq_length').drop(columns=['seq_length'])
+
+    # Save to a new CSV file
+    df_sorted.to_csv(output_file,index=False)
 
 rule af3_all:
     input:
@@ -59,50 +82,39 @@ checkpoint PREPROCESSING:
     input:
         INPUT_DF
     output:
-        directory(os.path.join(OUTPUT_DIR,"PREPROCESSING"))
+        directory(os.path.join(OUTPUT_DIR,"PREPROCESSING")),
+        os.path.join(OUTPUT_DIR,"PREPROCESSING","task_table_auto_template_free.csv"),
+        os.path.join(OUTPUT_DIR,"PREPROCESSING","task_table_auto_template_based.csv")
     params:
         msa_option = MSA_OPTION,
         mode = MODE
     shell:
         """
         if [[ "{params.msa_option}" == "auto" ]]; then
-            python workflow/scripts/create_tasks_from_dataframe.py {input} {output} --msa-option auto_template_free --mode {params.mode}
-            python workflow/scripts/create_tasks_from_dataframe.py {input} {output} --msa-option auto_template_based --mode {params.mode}
+            python workflow/scripts/create_tasks_from_dataframe.py {input} {output[0]} --msa-option auto_template_free --mode {params.mode}
+            python workflow/scripts/create_tasks_from_dataframe.py {input} {output[0]} --msa-option auto_template_based --mode {params.mode}
         else
-            python workflow/scripts/create_tasks_from_dataframe.py {input} {output} --mode {params.mode}
+            python workflow/scripts/create_tasks_from_dataframe.py {input} {output[0]} --mode {params.mode}
         fi
         """
 
-rule AF3_DATA_PIPELINE:
+rule PREPARE_COLABFOLD_SEARCH_INPUTS:
     input:
-        os.path.join(OUTPUT_DIR,"PREPROCESSING","{i}.json")
+        os.path.join(OUTPUT_DIR,"PREPROCESSING","task_table_auto_template_free.csv"),
+         os.path.join(OUTPUT_DIR,"PREPROCESSING","task_table_auto_template_based.csv")
+    output:
+        os.path.join(OUTPUT_DIR,"PREPARE_COLABFOLD_SEARCH_INPUTS","task_table_auto_template_free_colabfold_search_compatible.csv"),
+        os.path.join(OUTPUT_DIR,"PREPARE_COLABFOLD_SEARCH_INPUTS","task_table_auto_template_based_colabfold_search_compatible.csv")
+    run:
+        prepare_colabfold_search_compatible_table(input[0],output[0])
+        prepare_colabfold_search_compatible_table(input[1],output[1])
+
+rule MMSEQS2:
+    input:
+        jsons = os.path.join(OUTPUT_DIR,"PREPROCESSING","{i}.json"),
+        #task_table = os.path.join(OUTPUT_DIR,"PREPARE_COLABFOLD_SEARCH_INPUTS","task_table_auto_template_free_colabfold_search_compatible.csv")
     params:
-        buckets = BUCKETS,
-        conformer_max_iterations = CONFORMER_MAX_ITERATIONS,
-        flash_attention_implementation = FLASH_ATTENTION_IMPLEMENTATION,
-        gpu_device = GPU_DEVICE,
-        hmmalign_binary_path = HMMALIGN_BINARY_PATH,
-        hmmbuild_binary_path = HMMBUILD_BINARY_PATH,
-        hmmsearch_binary_path = HMMSEARCH_BINARY_PATH,
-        jackhmmer_binary_path = JACKHMMER_BINARY_PATH,
-        jackhmmer_n_cpu = JACKHMMER_N_CPU,
-        jax_compilation_cache_dir = JAX_COMPILATION_CACHE_DIR,
-        max_template_date = MAX_TEMPLATE_DATE,
-        mgnify_database_path = MGNIFY_DATABASE_PATH,
-        nhmmer_binary_path = NHMMER_BINARY_PATH,
-        nhmmer_n_cpu = NHMMER_N_CPU,
-        ntrna_database_path = NTRNA_DATABASE_PATH,
-        num_diffusion_samples = NUM_DIFFUSION_SAMPLES,
-        num_recycles = NUM_RECYCLES,
-        num_seeds_arg = NUM_SEEDS_ARG,
-        pdb_database_path = PDB_DATABASE_PATH,
-        rfam_database_path = RFAM_DATABASE_PATH,
-        rna_central_database_path = RNA_CENTRAL_DATABASE_PATH,
-        save_embeddings = SAVE_EMBEDDINGS,
-        seqres_database_path = SEQRES_DATABASE_PATH,
-        small_bfd_database_path = SMALL_BFD_DATABASE_PATH,
-        uniprot_cluster_annot_database_path = UNIPROT_CLUSTER_ANNOT_DATABASE_PATH,
-        uniref90_database_path = UNIREF90_DATABASE_PATH
+        "pass"
     output:
         data_pipeline_msa = os.path.join(OUTPUT_DIR,"AF3_DATA","{i}/{i}_data.json"),
     container:
